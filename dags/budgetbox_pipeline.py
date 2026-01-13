@@ -2,9 +2,10 @@
 BudgetBox Analytics Pipeline DAG
 
 Orchestrates:
-1. Ingest mock transaction data → raw.transactions
-2. Run dbt models (staging → marts)
-3. Run dbt tests
+1. Ingest exchange rates from Frankfurter API
+2. Ingest mock transaction data
+3. Run dbt models (staging → marts)
+4. Run dbt tests
 
 Schedule: Hourly
 """
@@ -31,6 +32,23 @@ default_args = {
 }
 
 
+def run_exchange_rates_ingestion(**context):
+    """Run exchange rates ingestion from Frankfurter API."""
+    import sys
+    sys.path.insert(0, str(PROJECT_ROOT))
+    
+    from ingestion.exchange_rates import ExchangeRatesIngestion
+    
+    ingestion = ExchangeRatesIngestion()
+    result = ingestion.run(
+        base_currency="GBP",
+        target_currencies=["USD", "EUR"],
+    )
+    
+    print(f"Ingested {result['rows_loaded']} exchange rates")
+    return result
+
+
 def run_transaction_ingestion(**context):
     """Run mock transaction ingestion."""
     import sys
@@ -41,7 +59,6 @@ def run_transaction_ingestion(**context):
     ingestion = MockTransactionsIngestion()
     result = ingestion.run(num_transactions=50, days_back=30)
     
-    # Log results for Airflow UI
     print(f"Ingested {result['rows_loaded']} transactions")
     return result
 
@@ -58,12 +75,18 @@ with DAG(
 ) as dag:
 
     # =========================================================================
-    # INGESTION
+    # INGESTION (parallel)
     # =========================================================================
+    ingest_exchange_rates = PythonOperator(
+        task_id="ingest_exchange_rates",
+        python_callable=run_exchange_rates_ingestion,
+        doc_md="Fetch daily exchange rates from Frankfurter API",
+    )
+
     ingest_transactions = PythonOperator(
         task_id="ingest_transactions",
         python_callable=run_transaction_ingestion,
-        doc_md="Generate and load mock transaction data into raw.transactions",
+        doc_md="Generate and load mock transaction data",
     )
 
     # =========================================================================
@@ -83,5 +106,6 @@ with DAG(
 
     # =========================================================================
     # DEPENDENCIES
+    # Ingestion tasks run in parallel, then dbt
     # =========================================================================
-    ingest_transactions >> dbt_run >> dbt_test
+    [ingest_exchange_rates, ingest_transactions] >> dbt_run >> dbt_test

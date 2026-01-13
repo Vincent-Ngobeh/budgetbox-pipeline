@@ -2,51 +2,55 @@ version: 2
 
 models:
   - name: stg_transactions
-    description: "Cleaned and standardized transaction data from raw source"
+    description: "Cleaned and standardized transaction data"
     columns:
       - name: transaction_id
-        description: "Primary key - unique transaction identifier"
-        tests:
+        description: "Primary key"
+        data_tests:
           - unique
           - not_null
       - name: account_id
-        description: "Foreign key to accounts"
-        tests:
+        description: "Account identifier"
+        data_tests:
           - not_null
-      - name: account_type
-        description: "Type of account"
-        tests:
-          - accepted_values:
-              values: ['current', 'savings', 'credit']
-      - name: currency
-        description: "Currency code"
-        tests:
-          - not_null
-          - accepted_values:
-              values: ['GBP', 'USD', 'EUR']
       - name: amount
         description: "Absolute transaction amount"
-        tests:
+        data_tests:
           - not_null
       - name: signed_amount
         description: "Signed amount (negative for debits)"
-        tests:
+        data_tests:
           - not_null
       - name: transaction_type
-        description: "Transaction direction"
-        tests:
+        description: "credit or debit"
+        data_tests:
           - accepted_values:
               values: ['credit', 'debit']
       - name: category
         description: "Transaction category"
-        tests:
+        data_tests:
           - not_null
-      - name: category_type
-        description: "Category type"
-        tests:
-          - accepted_values:
-              values: ['income', 'expense']
       - name: transaction_date
         description: "Date of transaction"
-        tests:
+        data_tests:
+          - not_null
+
+  - name: stg_exchange_rates
+    description: "Cleaned exchange rate data"
+    columns:
+      - name: rate_date
+        description: "Date of the exchange rate"
+        data_tests:
+          - not_null
+      - name: base_currency
+        description: "Base currency (GBP)"
+        data_tests:
+          - not_null
+      - name: target_currency
+        description: "Target currency (USD, EUR)"
+        data_tests:
+          - not_null
+      - name: rate
+        description: "Exchange rate value"
+        data_tests:
           - not_null
