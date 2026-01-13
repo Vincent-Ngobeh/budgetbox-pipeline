@@ -27,7 +27,7 @@ A production-grade data engineering pipeline demonstrating end-to-end financial 
 
 ```
                         INGESTION                      TRANSFORMATION              SERVING
-                    
+
     +------------------+                              +---------------+
     | Exchange Rates   |--+                          |    Staging    |
     | (Frankfurter API)|  |                          | stg_transactions
@@ -398,15 +398,15 @@ The Streamlit dashboard provides interactive financial analytics:
 
 ### Overview and KPIs
 
-![Dashboard Overview](docs/images/dashboard_overview.png)
+![Dashboard Overview](docs/images/Analytics_visualisation1.png)
 
 ### Category Analysis
 
-![Dashboard Charts](docs/images/dashboard_charts.png)
+![Dashboard Charts](docs/images/Analytics_visualisation2.png)
 
 ### Transaction Details
 
-![Dashboard Transactions](docs/images/dashboard_transactions.png)
+![Dashboard Transactions](docs/images/Analytics_visualisation3.png)
 
 ---
 
