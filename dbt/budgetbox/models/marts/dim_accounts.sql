@@ -7,48 +7,42 @@
 
 /*
     Dimension: Accounts
-
+    
     Contains unique accounts derived from transaction data.
-    In a production system, this would come from a dedicated accounts source.
+    Deduplicates by account_id, keeping the first occurrence.
 */
 
 with accounts_from_transactions as (
-    select distinct
+    select
         account_id,
         account_name,
         account_type,
-        bank_name,
-        currency
+        currency,
+        row_number() over (partition by account_id order by account_name) as rn
     from {{ ref('stg_transactions') }}
+),
+
+deduplicated as (
+    select
+        account_id,
+        account_name,
+        account_type,
+        currency
+    from accounts_from_transactions
+    where rn = 1
 ),
 
 accounts as (
     select
-        -- Surrogate key
         row_number() over (order by account_id) as account_key,
-
-        -- Natural key
         account_id,
-
-        -- Attributes
         account_name,
         account_type,
-        bank_name,
         currency,
-
-        -- Display formatting
-        case account_type
-            when 'current' then 'Current Account'
-            when 'savings' then 'Savings Account'
-            when 'credit' then 'Credit Card'
-            else account_type
-        end as account_type_display,
-
-        -- Metadata
         current_timestamp as created_at,
+        current_timestamp as updated_at,
         true as is_active
-
-    from accounts_from_transactions
+    from deduplicated
 )
 
 select * from accounts
