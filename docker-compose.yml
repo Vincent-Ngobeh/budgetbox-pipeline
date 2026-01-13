@@ -1,22 +1,20 @@
 version: '3.8'
 
 x-airflow-common: &airflow-common
-  build:
-    context: .
-    dockerfile: Dockerfile
+  build: .
   environment:
     - AIRFLOW__CORE__EXECUTOR=LocalExecutor
-    - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
+    - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
     - AIRFLOW__CORE__FERNET_KEY=${AIRFLOW__CORE__FERNET_KEY:-}
     - AIRFLOW__CORE__LOAD_EXAMPLES=False
     - AIRFLOW__WEBSERVER__SECRET_KEY=${AIRFLOW__WEBSERVER__SECRET_KEY:-supersecretkey}
-    - DUCKDB_PATH=/data/budgetbox.duckdb
+    - DUCKDB_PATH=/opt/airflow/data/budgetbox.duckdb
     - PYTHONPATH=/opt/airflow
   volumes:
     - ./dags:/opt/airflow/dags
     - ./ingestion:/opt/airflow/ingestion
     - ./dbt:/opt/airflow/dbt
-    - ./data:/data
+    - ./data:/opt/airflow/data
     - ./logs:/opt/airflow/logs
   depends_on:
     postgres:
