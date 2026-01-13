@@ -1,0 +1,52 @@
+version: 2
+
+models:
+  - name: stg_transactions
+    description: "Cleaned and standardized transaction data from raw source"
+    columns:
+      - name: transaction_id
+        description: "Primary key - unique transaction identifier"
+        tests:
+          - unique
+          - not_null
+      - name: account_id
+        description: "Foreign key to accounts"
+        tests:
+          - not_null
+      - name: account_type
+        description: "Type of account"
+        tests:
+          - accepted_values:
+              values: ['current', 'savings', 'credit']
+      - name: currency
+        description: "Currency code"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['GBP', 'USD', 'EUR']
+      - name: amount
+        description: "Absolute transaction amount"
+        tests:
+          - not_null
+      - name: signed_amount
+        description: "Signed amount (negative for debits)"
+        tests:
+          - not_null
+      - name: transaction_type
+        description: "Transaction direction"
+        tests:
+          - accepted_values:
+              values: ['credit', 'debit']
+      - name: category
+        description: "Transaction category"
+        tests:
+          - not_null
+      - name: category_type
+        description: "Category type"
+        tests:
+          - accepted_values:
+              values: ['income', 'expense']
+      - name: transaction_date
+        description: "Date of transaction"
+        tests:
+          - not_null

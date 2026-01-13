@@ -1,0 +1,125 @@
+version: 2
+
+models:
+  - name: dim_dates
+    description: "Date dimension for time-based analytics"
+    columns:
+      - name: date_key
+        description: "Primary key (YYYYMMDD format)"
+        tests:
+          - unique
+          - not_null
+      - name: full_date
+        description: "Full date value"
+        tests:
+          - unique
+          - not_null
+      - name: day_of_week
+        description: "Day of week (0=Sunday, 6=Saturday)"
+      - name: month_number
+        description: "Month number (1-12)"
+      - name: year_number
+        description: "Four digit year"
+      - name: is_weekend
+        description: "Boolean flag for weekend days"
+
+  - name: dim_accounts
+    description: "Account dimension derived from transactions"
+    columns:
+      - name: account_key
+        description: "Surrogate primary key"
+        tests:
+          - unique
+          - not_null
+      - name: account_id
+        description: "Natural key from source system"
+        tests:
+          - unique
+          - not_null
+      - name: account_type
+        description: "Type of account"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['current', 'savings', 'credit']
+      - name: currency
+        description: "Account currency"
+        tests:
+          - not_null
+
+  - name: dim_categories
+    description: "Transaction category dimension with hierarchy"
+    columns:
+      - name: category_key
+        description: "Surrogate primary key"
+        tests:
+          - unique
+          - not_null
+      - name: category_id
+        description: "Natural key (category name)"
+        tests:
+          - unique
+          - not_null
+      - name: category_type
+        description: "Income or expense"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['income', 'expense']
+      - name: parent_category
+        description: "Parent category for grouping"
+        tests:
+          - not_null
+      - name: budget_category
+        description: "Essential, Semi-Essential, or Discretionary"
+        tests:
+          - accepted_values:
+              values: ['Essential', 'Semi-Essential', 'Discretionary']
+
+  - name: fact_transactions
+    description: "Central fact table containing all financial transactions"
+    columns:
+      - name: transaction_key
+        description: "Surrogate primary key"
+        tests:
+          - unique
+          - not_null
+      - name: transaction_id
+        description: "Natural key from source"
+        tests:
+          - unique
+          - not_null
+      - name: date_key
+        description: "Foreign key to dim_dates"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_dates')
+              field: date_key
+      - name: account_key
+        description: "Foreign key to dim_accounts"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_accounts')
+              field: account_key
+      - name: category_key
+        description: "Foreign key to dim_categories"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_categories')
+              field: category_key
+      - name: amount
+        description: "Transaction amount in original currency (always positive)"
+        tests:
+          - not_null
+      - name: signed_amount
+        description: "Signed amount (negative for debits)"
+        tests:
+          - not_null
+      - name: transaction_type
+        description: "Credit or debit"
+        tests:
+          - accepted_values:
+              values: ['credit', 'debit']
