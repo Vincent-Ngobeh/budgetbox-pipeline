@@ -1,0 +1,58 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+.venv/
+.env
+
+# Data files
+*.duckdb
+*.duckdb.wal
+data/
+*.parquet
+*.csv
+
+# dbt
+dbt/budgetbox/target/
+dbt/budgetbox/dbt_packages/
+dbt/budgetbox/logs/
+dbt/budgetbox/.user.yml
+
+# Airflow
+logs/
+airflow.db
+airflow.cfg
+webserver_config.py
+airflow-webserver.pid
+
+# Great Expectations
+great_expectations/uncommitted/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Build
+build/
+dist/
+*.egg-info/
