@@ -1,0 +1,18 @@
+# dbt profiles for BudgetBox pipeline
+#
+# Usage options:
+#   1. Copy to ~/.dbt/profiles.yml
+#   2. Run with: dbt run --profiles-dir .
+
+budgetbox:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: "{{ env_var('DUCKDB_PATH', '../../data/budgetbox.duckdb') }}"
+      threads: 4
+
+    prod:
+      type: duckdb
+      path: "{{ env_var('DUCKDB_PATH', '/data/budgetbox.duckdb') }}"
+      threads: 8

@@ -1,0 +1,73 @@
+version: 2
+
+sources:
+  - name: raw
+    description: "Raw data ingested by Python scripts"
+    schema: raw
+
+    tables:
+      - name: transactions
+        description: "Raw transaction data from mock bank feeds"
+        columns:
+          - name: transaction_id
+            description: "Unique transaction identifier (UUID)"
+            tests:
+              - unique
+              - not_null
+          - name: account_id
+            description: "Account identifier"
+            tests:
+              - not_null
+          - name: account_name
+            description: "Human-readable account name"
+          - name: account_type
+            description: "Account type: current, savings, credit"
+            tests:
+              - accepted_values:
+                  values: ['current', 'savings', 'credit']
+          - name: bank_name
+            description: "Name of the bank"
+          - name: currency
+            description: "Currency code (GBP, USD, EUR)"
+            tests:
+              - not_null
+          - name: amount
+            description: "Transaction amount (always positive)"
+            tests:
+              - not_null
+          - name: signed_amount
+            description: "Signed amount (negative for debits)"
+            tests:
+              - not_null
+          - name: transaction_type
+            description: "credit or debit"
+            tests:
+              - accepted_values:
+                  values: ['credit', 'debit']
+          - name: category
+            description: "Transaction category (e.g., Groceries, Rent/Mortgage)"
+            tests:
+              - not_null
+          - name: category_type
+            description: "income or expense"
+            tests:
+              - accepted_values:
+                  values: ['income', 'expense']
+          - name: merchant
+            description: "Merchant name"
+          - name: description
+            description: "Transaction description"
+          - name: transaction_date
+            description: "Date of transaction"
+            tests:
+              - not_null
+          - name: transaction_timestamp
+            description: "Full timestamp of transaction"
+          - name: _ingested_at
+            description: "Timestamp when data was ingested"
+          - name: _source
+            description: "Source system identifier"
+        freshness:
+          warn_after: {count: 24, period: hour}
+          error_after: {count: 48, period: hour}
+        loaded_at_field: _ingested_at
