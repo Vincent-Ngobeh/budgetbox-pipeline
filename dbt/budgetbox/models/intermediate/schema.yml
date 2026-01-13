@@ -1,0 +1,29 @@
+version: 2
+
+models:
+  - name: int_transactions_with_gbp
+    description: "Transactions enriched with GBP-converted amounts"
+    columns:
+      - name: transaction_id
+        description: "Primary key"
+        data_tests:
+          - unique
+          - not_null
+      - name: amount
+        description: "Original amount in source currency"
+        data_tests:
+          - not_null
+      - name: amount_gbp
+        description: "Amount converted to GBP"
+        data_tests:
+          - not_null
+      - name: signed_amount_gbp
+        description: "Signed amount in GBP (negative for debits)"
+        data_tests:
+          - not_null
+      - name: exchange_rate_used
+        description: "Exchange rate applied (null for GBP transactions)"
+      - name: was_converted
+        description: "Whether currency conversion was applied"
+        data_tests:
+          - not_null

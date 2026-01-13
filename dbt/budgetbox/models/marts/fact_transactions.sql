@@ -7,18 +7,15 @@
 
 /*
     Fact: Transactions
-
-    Central fact table containing all financial transactions
-    with foreign keys to dimension tables.
-
+    
+    Central fact table with all financial transactions.
+    Includes GBP-converted amounts from intermediate layer.
+    
     Grain: One row per transaction
-
-    Note: This model is independent and does not require exchange rates.
-    Currency conversion can be added in a later iteration.
 */
 
 with transactions as (
-    select * from {{ ref('stg_transactions') }}
+    select * from {{ ref('int_transactions_with_gbp') }}
 ),
 
 dim_accounts as (
@@ -37,46 +34,47 @@ fact_transactions as (
     select
         -- Surrogate key
         row_number() over (order by t.transaction_timestamp) as transaction_key,
-
+        
         -- Natural key
         t.transaction_id,
-
-        -- Foreign keys to dimensions
+        
+        -- Foreign keys
         d.date_key,
         a.account_key,
         c.category_key,
-
-        -- Degenerate dimensions (transaction-level attributes)
+        
+        -- Transaction attributes
         t.merchant,
         t.description,
         t.transaction_type,
-
-        -- Measures (facts)
+        
+        -- Amounts (original currency)
         t.amount,
         t.signed_amount,
         t.currency,
-
-        -- For future GBP conversion (currently same as amount since all GBP)
-        t.amount as amount_gbp,
-        t.signed_amount as signed_amount_gbp,
-
-        -- Date/time
+        
+        -- Amounts (GBP converted)
+        t.amount_gbp,
+        t.signed_amount_gbp,
+        
+        -- Conversion metadata
+        t.exchange_rate_used,
+        t.exchange_rate_date,
+        t.was_converted,
+        
+        -- Timestamps
         t.transaction_date,
         t.transaction_timestamp,
-
-        -- Audit columns
+        
+        -- Audit
         t._ingested_at,
         current_timestamp as _created_at
-
+        
     from transactions t
-
-    -- Join to dimensions
     left join dim_accounts a
         on t.account_id = a.account_id
-
     left join dim_categories c
         on t.category = c.category_id
-
     left join dim_dates d
         on t.transaction_date = d.full_date
 )

@@ -5,121 +5,127 @@ models:
     description: "Date dimension for time-based analytics"
     columns:
       - name: date_key
-        description: "Primary key (YYYYMMDD format)"
-        tests:
+        description: "Primary key (YYYYMMDD)"
+        data_tests:
           - unique
           - not_null
       - name: full_date
         description: "Full date value"
-        tests:
+        data_tests:
           - unique
           - not_null
-      - name: day_of_week
-        description: "Day of week (0=Sunday, 6=Saturday)"
-      - name: month_number
-        description: "Month number (1-12)"
-      - name: year_number
-        description: "Four digit year"
-      - name: is_weekend
-        description: "Boolean flag for weekend days"
 
   - name: dim_accounts
-    description: "Account dimension derived from transactions"
+    description: "Account dimension"
     columns:
       - name: account_key
-        description: "Surrogate primary key"
-        tests:
+        description: "Surrogate key"
+        data_tests:
           - unique
           - not_null
       - name: account_id
-        description: "Natural key from source system"
-        tests:
+        description: "Natural key"
+        data_tests:
           - unique
           - not_null
       - name: account_type
-        description: "Type of account"
-        tests:
+        description: "Account type"
+        data_tests:
           - not_null
           - accepted_values:
               values: ['current', 'savings', 'credit']
       - name: currency
         description: "Account currency"
-        tests:
+        data_tests:
           - not_null
 
   - name: dim_categories
     description: "Transaction category dimension with hierarchy"
     columns:
       - name: category_key
-        description: "Surrogate primary key"
-        tests:
+        description: "Surrogate key"
+        data_tests:
           - unique
           - not_null
       - name: category_id
-        description: "Natural key (category name)"
-        tests:
+        description: "Natural key"
+        data_tests:
           - unique
           - not_null
       - name: category_type
-        description: "Income or expense"
-        tests:
+        description: "income or expense"
+        data_tests:
           - not_null
           - accepted_values:
               values: ['income', 'expense']
       - name: parent_category
-        description: "Parent category for grouping"
-        tests:
+        description: "Parent category grouping"
+        data_tests:
           - not_null
       - name: budget_category
-        description: "Essential, Semi-Essential, or Discretionary"
-        tests:
+        description: "Budget classification"
+        data_tests:
+          - not_null
           - accepted_values:
               values: ['Essential', 'Semi-Essential', 'Discretionary']
 
   - name: fact_transactions
-    description: "Central fact table containing all financial transactions"
+    description: "Central fact table with GBP-converted amounts"
     columns:
       - name: transaction_key
-        description: "Surrogate primary key"
-        tests:
+        description: "Surrogate key"
+        data_tests:
           - unique
           - not_null
       - name: transaction_id
-        description: "Natural key from source"
-        tests:
+        description: "Natural key"
+        data_tests:
           - unique
           - not_null
       - name: date_key
-        description: "Foreign key to dim_dates"
-        tests:
+        description: "FK to dim_dates"
+        data_tests:
           - not_null
           - relationships:
               to: ref('dim_dates')
               field: date_key
       - name: account_key
-        description: "Foreign key to dim_accounts"
-        tests:
+        description: "FK to dim_accounts"
+        data_tests:
           - not_null
           - relationships:
               to: ref('dim_accounts')
               field: account_key
       - name: category_key
-        description: "Foreign key to dim_categories"
-        tests:
+        description: "FK to dim_categories"
+        data_tests:
           - not_null
           - relationships:
               to: ref('dim_categories')
               field: category_key
       - name: amount
-        description: "Transaction amount in original currency (always positive)"
-        tests:
+        description: "Amount in original currency"
+        data_tests:
           - not_null
       - name: signed_amount
-        description: "Signed amount (negative for debits)"
-        tests:
+        description: "Signed amount in original currency"
+        data_tests:
+          - not_null
+      - name: amount_gbp
+        description: "Amount converted to GBP"
+        data_tests:
+          - not_null
+      - name: signed_amount_gbp
+        description: "Signed amount in GBP"
+        data_tests:
           - not_null
       - name: transaction_type
-        description: "Credit or debit"
-        tests:
+        description: "credit or debit"
+        data_tests:
+          - not_null
           - accepted_values:
               values: ['credit', 'debit']
+      - name: was_converted
+        description: "Whether currency conversion was applied"
+        data_tests:
+          - not_null
